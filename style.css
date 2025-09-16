@@ -1,0 +1,127 @@
+:root {
+  --primary-color: #0080ff;
+  --secondary-color: #28a745;
+  --danger-color: #dc3545;
+}
+* {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.container {
+  background-color: #f0f0f0;
+}
+
+.box {
+  width: 100%;
+  background-color: #fff;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .container {
+    height: 90vh;
+  }
+
+  .box {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 90%;
+    max-width: 500px;
+  }
+    .links a {
+    width: 25% !important;
+  }
+}
+
+.button {
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  background-color: #007BFF;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.3s;
+}
+
+.button:hover {
+  background-color: #0056b3;
+}
+
+.location-details {
+  display: none;
+  gap: 8px;
+}
+.location-details > div {
+  background-color: #fd7c54;
+  padding: 4px 6px;
+  border-radius: 5px;
+  color: rgb(0, 16, 104);
+  font-size: 14px;
+}
+.location-details > .button {
+  grid-column: 1 / span 3;
+  text-decoration: none;
+}
+ .location-details > #digipin::before {
+   content: "Your DIGIPIN: ";
+   color: #fd7c54;
+   font-size: 12px;
+   display: block;
+   text-align: left;
+ }
+ .location-details > #digipin {
+   cursor: pointer;
+   text-align: left;
+   border: 1px solid #fd7c54;
+   background-color: transparent;
+   color: #0056b3;
+   font-weight: bold;
+  grid-column: 1 / span 3;
+  font-size: 22px;
+  padding: 1rem;
+ }
+.location-details #map {
+  height: 50vh;
+  border-radius: 5px;
+  overflow: hidden;
+  grid-column: 1 / span 3;
+}
+
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 3rem;
+  width: 90%;
+  max-width: 600px;
+}
+
+.links a {
+  cursor: pointer;
+  color: var(--primary-color);
+  padding: 0.7rem 1.5rem;
+  text-align: left;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 12px;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.links a:hover {
+  background-color: var(--primary-color);
+  color: #fff;
+}
