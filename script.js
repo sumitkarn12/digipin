@@ -14,6 +14,7 @@ let currentlatlng = {
   accuracy: 35
 }
 const GOOGLE_MAP_LINK = `https://www.google.com/maps?q=`;
+const IP_LOC_API_URL = `https://ipinfo.io/json`;
 
 function showToast(m, d = 5) {
   t = Toastify({
@@ -34,10 +35,10 @@ searchDigipin.addEventListener("input", e => {
     decodedDigipin = decodedDigipin.split(",").map( a => parseFloat( a) );
     render({lat: decodedDigipin[0], lng: decodedDigipin[1], accuracy: 0});
   }
-})
+});
 resetMap.addEventListener("click", ( e ) => {
   render( currentlatlng );
-})
+});
 
 function render( latlng ) {
   digipin.textContent = Get_DIGIPIN(latlng.lat, latlng.lng);
@@ -58,9 +59,6 @@ function render( latlng ) {
     map.on("click", ev => {
       render({ lat: ev.latlng.lat, lng: ev.latlng.lng, accuracy: 0 });
     })
-    // L.popup({ lat: ev.latlng.lat, lng: ev.latlng.lng, accuracy: 0 }, {
-    //   content: `<strong>Digipin:</strong> ${digipin.textContent}<br/><a href="${GOOGLE_MAP_LINK}${latlng.lat},${latlng.lng}" target="_blank">View on Google Maps</a>`
-    // }).openOn( map )
   }
 
   if ( !marker ) {
@@ -71,52 +69,76 @@ function render( latlng ) {
   marker.bindPopup(`<strong>Digipin:</strong> ${digipin.textContent}<br/><a href="${GOOGLE_MAP_LINK}${latlng.lat},${latlng.lng}" target="_blank">View on Google Maps</a>`).openPopup();
 }
 
-// Check if the browser supports the Geolocation API
-if (navigator.geolocation) {
-  // Get the current position
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      t?.hideToast();
-      // Success callback
-      currentlatlng.lat = position.coords.latitude;
-      currentlatlng.lng = position.coords.longitude;
-      currentlatlng.accuracy = position.coords.accuracy;
+async function getGeoLocation() {
+  return new Promise( ( resolve, reject ) => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        t?.hideToast();
+        // Success callback
+        currentlatlng.lat = position.coords.latitude;
+        currentlatlng.lng = position.coords.longitude;
+        currentlatlng.accuracy = position.coords.accuracy;
 
-      render( currentlatlng );
-    },
-    (error) => {
-      // Error callback
-      let errorMessage;
-      switch (error.code) {
-        case error.PERMISSION_DENIED:
-          errorMessage = "User denied the request for Geolocation.";
-          break;
-        case error.POSITION_UNAVAILABLE:
-          errorMessage = "Location information is unavailable.";
-          break;
-        case error.TIMEOUT:
-          errorMessage = "The request to get user location timed out.";
-          break;
-        case error.UNKNOWN_ERROR:
-          errorMessage = "An unknown error occurred.";
-          break;
+        resolve(currentlatlng);
+      },
+      (error) => {
+        // Error callback
+        let errorMessage;
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = "User denied the request for Geolocation.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "Location information is unavailable.";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "The request to get user location timed out.";
+            break;
+          case error.UNKNOWN_ERROR:
+            errorMessage = "An unknown error occurred.";
+            break;
+        }
+        reject( error );
       }
-      showToast(errorMessage);
-      locationDetails.style.display = 'none';
-      console.error("Geolocation error:", error);
-    }
-  );
-} else {
-  // Browser doesn't support Geolocation
-  showToast('Geolocation is not supported by your browser.');
-  locationDetails.style.display = 'none';
+    );
+  });
+}
+
+async function getLocationByIP() {
+  return new Promise((resolve, reject) => {
+    fetch( IP_LOC_API_URL ). then( res => res.json()).
+    then( j => {
+      let loc = j.loc.split(",").map(a => parseFloat(a));
+      currentlatlng.lat = loc[0];
+      currentlatlng.lng = loc[1];
+      currentlatlng.accuracy = 1000;
+      resolve( currentlatlng );
+    })
+    .catch( () => { reject( "Unable to fetch location by IP." ) });
+  });
+}
+
+navigator.permissions.query({name: 'geolocation'}).then( r => {
+  handleLocationPermission( r.state );
+  r.onchange = ( e ) => {
+    e.preventDefault();
+    handleLocationPermission( e.target.state );
+  }
+});
+
+function handleLocationPermission( state ) {
+  if ( state == "denied" ) {
+    showToast( "GPS Permission denied by the user hence fetching location using IP." );
+    return getLocationByIP().then( render );
+  }
+  getGeoLocation().then( render );
 }
 
 /**
  * Function GET_DIGIPIN() takes latitude-longitude as input and encodes
-it into a 10 digit alphanumeric code
+ * it into a 10 digit alphanumeric code
  * A higher precision (upto 5 decimal places) of latitude-longitude input
-values results in more precise DIGIPIN
+ * values results in more precise DIGIPIN
  */
 function Get_DIGIPIN(lat, lon) {
   //DIGIPIN Labelling Grid
@@ -197,9 +219,9 @@ function Get_DIGIPIN(lat, lon) {
 }
 
 /**
- * Function Get_LatLng_By_Digipin() takes a 10 digit alphanumeric code
-as input and encodes it into degree-decimal coordinates
- */
+  Function Get_LatLng_By_Digipin() takes a 10 digit alphanumeric code
+  as input and encodes it into degree-decimal coordinates
+*/
 function Get_LatLng_By_Digipin(vDigiPin) {
   vDigiPin = vDigiPin.replaceAll('-', '');
   if (vDigiPin.length != 10) {
