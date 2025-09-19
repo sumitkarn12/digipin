@@ -37,22 +37,20 @@
 
 	<div class="container">
 		<div class="box">
-			<h1>DIGIPIN</h1>
+  		<div class="header">
+  			<h1>DIGIPIN</h1>
+        <input type="search" id="search-digipin" placeholder="Search digipin" />
+  		</div>
 
 			<div class="location-details" id="location-details">
-				<div><strong>Latitude</strong>
-					<div id="latitude">34.5444</div>
-				</div>
-				<div><strong>Longitude</strong>
-					<div id="longitude">23.678</div>
-				</div>
-				<div><strong>Accuracy</strong>
-					<div><span id="accuracy">35.00</span> mtrs</div>
-				</div>
-				<a id="map-link" class="button" href="#" target="_blank">View on Google Maps</a>
-				<div id="digipin">XXX-XXX-XXXX</div>
+        <div id="latitude">34.5444</div>
+        <div id="longitude">23.678</div>
+        <div id="accuracy">35.00</div>
+				<div id="digipin" contenteditable="false">XXX-XXX-XXXX</div>
+				<button id="reset-map" class="button">My Current Location</button>
 				<div id="map"></div>
 			</div>
+      <div class="card-loader"></div>
 		</div>
 	</div>
 

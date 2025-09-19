@@ -1,51 +1,88 @@
 const locationDetails = document.getElementById('location-details');
+const searchDigipin = document.getElementById('search-digipin');
+const resetMap = document.getElementById('reset-map');
+const cardLoader = document.querySelector('.card-loader');
 const digipin = document.getElementById('digipin');
 const latitudeSpan = document.getElementById('latitude');
 const longitudeSpan = document.getElementById('longitude');
 const accuracySpan = document.getElementById('accuracy');
-const mapLink = document.getElementById('map-link');
+let t = null;
+let map, marker = null;
+let currentlatlng = {
+  lat: 13.038485,
+  lng: 80.122344,
+  accuracy: 35
+}
+const GOOGLE_MAP_LINK = `https://www.google.com/maps?q=`;
 
 function showToast(m, d = 5) {
-  Toastify({
+  t = Toastify({
     text: m,
     duration: d * 1000,
+    close: true
   }).showToast();
 }
 
 digipin.addEventListener("click", ( e ) => {
   navigator.clipboard.writeText( e.target.textContent );
-  showToast(`DIGIPIN: ${e.target.textContent} copied to your clipboard.`)
+  showToast(`DIGIPIN copied to your clipboard.`)
+});
+searchDigipin.addEventListener("input", e => {
+  e.preventDefault();
+  let decodedDigipin = Get_LatLng_By_Digipin(e.target.value.trim().toUpperCase());
+  if ( decodedDigipin != "Invalid DIGIPIN" ) {
+    decodedDigipin = decodedDigipin.split(",").map( a => parseFloat( a) );
+    render({lat: decodedDigipin[0], lng: decodedDigipin[1], accuracy: 0});
+  }
 })
+resetMap.addEventListener("click", ( e ) => {
+  render( currentlatlng );
+})
+
+function render( latlng ) {
+  digipin.textContent = Get_DIGIPIN(latlng.lat, latlng.lng);
+
+  // Update the HTML with the coordinates
+  locationDetails.style.display = 'grid';
+  cardLoader.style.display = 'none';
+  latitudeSpan.textContent = latlng.lat.toFixed(6);
+  longitudeSpan.textContent = latlng.lng.toFixed(6);
+  accuracySpan.textContent = latlng.accuracy.toFixed(2);
+
+  if ( !map ) {
+    map = L.map('map').setView([currentlatlng.lat, currentlatlng.lng], 15);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+    map.on("click", ev => {
+      render({ lat: ev.latlng.lat, lng: ev.latlng.lng, accuracy: 0 });
+    })
+    // L.popup({ lat: ev.latlng.lat, lng: ev.latlng.lng, accuracy: 0 }, {
+    //   content: `<strong>Digipin:</strong> ${digipin.textContent}<br/><a href="${GOOGLE_MAP_LINK}${latlng.lat},${latlng.lng}" target="_blank">View on Google Maps</a>`
+    // }).openOn( map )
+  }
+
+  if ( !marker ) {
+    marker = L.marker([currentlatlng.lat, currentlatlng.lng]).addTo(map);
+  } else {
+    marker.setLatLng({ lat: latlng.lat, lng: latlng.lng });
+  }
+  marker.bindPopup(`<strong>Digipin:</strong> ${digipin.textContent}<br/><a href="${GOOGLE_MAP_LINK}${latlng.lat},${latlng.lng}" target="_blank">View on Google Maps</a>`).openPopup();
+}
 
 // Check if the browser supports the Geolocation API
 if (navigator.geolocation) {
-  showToast("Loading...")
-
   // Get the current position
   navigator.geolocation.getCurrentPosition(
     (position) => {
+      t?.hideToast();
       // Success callback
-      const { latitude, longitude, accuracy } = position.coords;
-      digipin.textContent = Get_DIGIPIN( latitude, longitude );
+      currentlatlng.lat = position.coords.latitude;
+      currentlatlng.lng = position.coords.longitude;
+      currentlatlng.accuracy = position.coords.accuracy;
 
-      // Update the HTML with the coordinates
-      locationDetails.style.display = 'grid';
-      latitudeSpan.textContent = latitude.toFixed(6);
-      longitudeSpan.textContent = longitude.toFixed(6);
-      accuracySpan.textContent = accuracy.toFixed(2);
-
-      // Create a link to Google Maps
-      const mapUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
-      mapLink.href = mapUrl;
-      mapLink.style.display = 'grid';
-
-      var map = L.map('map').setView([latitude, longitude], 14);
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-      }).addTo(map);
-      let marker = L.marker([latitude, longitude]).addTo(map);
-      marker.bindPopup(`<strong>Accuracy:</strong> ${accuracy.toFixed(2)} meters`).openPopup();
+      render( currentlatlng );
     },
     (error) => {
       // Error callback
@@ -74,8 +111,6 @@ if (navigator.geolocation) {
   showToast('Geolocation is not supported by your browser.');
   locationDetails.style.display = 'none';
 }
-
-
 
 /**
  * Function GET_DIGIPIN() takes latitude-longitude as input and encodes
@@ -159,4 +194,67 @@ function Get_DIGIPIN(lat, lon) {
     MinLon = NextLvlMinLon; MaxLon = NextLvlMaxLon;
   }
   return vDIGIPIN;
+}
+
+/**
+ * Function Get_LatLng_By_Digipin() takes a 10 digit alphanumeric code
+as input and encodes it into degree-decimal coordinates
+ */
+function Get_LatLng_By_Digipin(vDigiPin) {
+  vDigiPin = vDigiPin.replaceAll('-', '');
+  if (vDigiPin.length != 10) {
+    return "Invalid DIGIPIN";
+  }
+  //DIGIPIN Labelling Grid
+  var L = [
+    ['F', 'C', '9', '8'],
+    ['J', '3', '2', '7'],
+    ['K', '4', '5', '6'],
+    ['L', 'M', 'P', 'T']
+  ];
+  // Bounding Box Extent
+  var MinLat = 2.50; var MaxLat = 38.50; var MinLng = 63.50; var MaxLng =
+    99.50;
+  var LatDivBy = 4;
+  var LngDivBy = 4;
+  var LatDivVal = 0;
+  var LngDivVal = 0;
+  var ri, ci, f;
+  var Lat1, Lat2, Lng1, Lng2;
+  for (let Lvl = 0; Lvl < 10; Lvl++) {
+    ri = -1;
+    ci = -1;
+    const digipinChar = vDigiPin.charAt(Lvl);
+    LatDivVal = (MaxLat - MinLat) / LatDivBy;
+    LngDivVal = (MaxLng - MinLng) / LngDivBy;
+    f = 0;
+
+    for (let r = 0; r < LatDivBy; r++) {
+          for (let c = 0; c < LngDivBy; c++) {
+            if (L[r][c] == digipinChar) {
+              ri = r;
+              ci = c;
+              f = 1;
+              break;
+            }
+          }
+        }
+
+        if (f == 0) {
+          return 'Invalid DIGIPIN';
+        }
+        Lat1 = MaxLat - (LatDivVal * (ri + 1));
+        Lat2 = MaxLat - (LatDivVal * (ri));
+    Lng1 = MinLng + (LngDivVal * (ci));
+    Lng2 = MinLng + (LngDivVal * (ci + 1));
+
+    MinLat = Lat1;
+    MaxLat = Lat2;
+    MinLng = Lng1;
+    MaxLng = Lng2;
+  }
+  cLat = (Lat2 + Lat1) / 2;
+  cLng = (Lng2 + Lng1) / 2;
+
+  return cLat + ', ' + cLng;
 }
