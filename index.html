@@ -2,218 +2,221 @@
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-	<title>DIGIPIN - India's Digital Address System by India Post</title>
-	<meta name="description"
-		content="Understand DIGIPIN, a new digital address system by India Post. Get your unique 10-character alphanumeric code for precise location identification and seamless delivery.">
-	<meta property="og:title" content="DIGIPIN - India's New Digital Address System">
-	<meta property="og:description"
-		content="Get your DIGIPIN, a revolutionary new system from India Post for precise and accurate digital addresses.">
-	<meta property="og:url" content="https://digipin.idkey.in/">
-	<meta property="og:type" content="website">
+  <title>DIGIPIN - India's Digital Address System by India Post</title>
+  <meta name="description"
+    content="Understand DIGIPIN, a new digital address system by India Post. Get your unique 10-character alphanumeric code for precise location identification and seamless delivery.">
+  <meta property="og:title" content="DIGIPIN - India's New Digital Address System">
+  <meta property="og:description"
+    content="Get your DIGIPIN, a revolutionary new system from India Post for precise and accurate digital addresses.">
+  <meta property="og:url" content="https://digipin.idkey.in/">
+  <meta property="og:type" content="website">
 
 
-	<meta property="og:image"
-		content="https://og.tailgraph.com/og?title=Get%20your%20DIGIPIN&text=A%20new%20digital%20address%20system%20by%20India%20Post.%20Get%20your%20unique%20code%20for%20precise%20location%20identification%20%26%20seamless%20delivery.&bgUrl=https%3A%2F%2Fi.postimg.cc%2Fyd3Zg49b%2Fdigipin.jpg&titleFontFamily=Inter&bgTailwind=bg-no-repeat%20bg-cover&titleTailwind=text-6xl%20text-white%20font-black%20text-left%20px-16&textFontFamily=Josephine%20Sans&textTailwind=text-5xl%20text-white%20text-left%20px-16&overlay=1&containerTailwind=p-16" />
+  <meta property="og:image"
+    content="https://og.tailgraph.com/og?title=Get%20your%20DIGIPIN&text=A%20new%20digital%20address%20system%20by%20India%20Post.%20Get%20your%20unique%20code%20for%20precise%20location%20identification%20%26%20seamless%20delivery.&bgUrl=https%3A%2F%2Fi.postimg.cc%2Fyd3Zg49b%2Fdigipin.jpg&titleFontFamily=Inter&bgTailwind=bg-no-repeat%20bg-cover&titleTailwind=text-6xl%20text-white%20font-black%20text-left%20px-16&textFontFamily=Josephine%20Sans&textTailwind=text-5xl%20text-white%20text-left%20px-16&overlay=1&containerTailwind=p-16" />
 
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-		integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-	<!-- Make sure you put this AFTER Leaflet's CSS -->
-	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-		integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <!-- Make sure you put this AFTER Leaflet's CSS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
-	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-	<link rel="icon" href="/favicon.webp" />
-	<link rel="stylesheet" href="https://age-calculator.idkey.in/core.css" />
+  <link rel="shortcut icon" href="https://age-calculator.idkey.in/favicon.svg" type="image/x-icon">
+  <link rel="stylesheet" href="https://age-calculator.idkey.in/core.css" />
 
-	<link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
 
-	<div class="container">
-		<div class="box">
-			<div class="header">
-				<h1>DIGIPIN</h1>
-				<input type="search" id="search-digipin" placeholder="Search digipin" />
-  		</div>
+  <div class="container">
+    <div class="box">
+      <div class="header">
+        <h1>DIGIPIN</h1>
+        <input type="search" id="search-digipin" placeholder="Search digipin" />
+      </div>
 
-				<div class="location-details" id="location-details">
-					<div id="latitude">34.5444</div>
-					<div id="longitude">23.678</div>
-					<div id="accuracy">35.00</div>
-					<div id="digipin">XXX-XXX-XXXX</div>
-					<button id="reset-map" class="button">My Current Location</button>
-					<div id="map"></div>
-				</div>
-				<div class="card-loader"></div>
-			</div>
-			<div class="box">
-				<h2 id="welcome-to-the-future-of-addresses-get-your-official-digipin-">Welcome to the Future of
-					Addresses: Get Your
-					Official DIGIPIN!</h2>
-				<p>Tired of long, confusing addresses that get lost in translation? Say hello to
-					<a href="https://indiapost.gov.in/digipin" target="_blank"><strong>DIGIPIN</strong></a>—a
-					revolutionary digital address system launched by <a href="https://indiapost.gov.in/digipin"
-						target="_blank"><strong>India Post</strong></a> in collaboration with
-					<a href="https://www.isro.gov.in/" target="_blank"><strong>ISRO</strong></a>. This isn&#39;t just
-					another location app; it&#39;s a groundbreaking
-					initiative to modernize
-					India&#39;s postal and address infrastructure, making every location in the country easy to find and
-					share with a
-					unique, 10-character code.</p>
-				<p>Our website is your direct and easy-to-use platform to access this incredible technology. We help you
-					get your
-					personal DIGIPIN and decode any pin you receive, bridging the gap between physical locations and the
-					digital world.
-				</p>
-				<h3 id="what-is-digipin-">What is DIGIPIN?</h3>
-				<p>A <strong>DIGIPIN</strong> (Digital Postal Index Number) is a unique, 10-character alphanumeric code
-					that represents
-					a precise location in India. Developed by the Department of Posts with the expertise of
+      <div class="location-details" id="location-details">
+        <div id="latitude">34.5444</div>
+        <div id="longitude">23.678</div>
+        <div id="accuracy">35.00</div>
+        <div id="digipin">XXX-XXX-XXXX</div>
+        <button id="reset-map" class="button">My Current Location</button>
+        <div id="map"></div>
+      </div>
+      <div class="card-loader"></div>
+    </div>
+    <div class="box">
+      <h2 id="welcome-to-the-future-of-addresses-get-your-official-digipin-">Welcome to the Future of
+        Addresses: Get Your
+        Official DIGIPIN!</h2>
+      <p>Tired of long, confusing addresses that get lost in translation? Say hello to
+        <a href="https://indiapost.gov.in/digipin" target="_blank"><strong>DIGIPIN</strong></a>—a
+        revolutionary digital address system launched by <a href="https://indiapost.gov.in/digipin"
+          target="_blank"><strong>India Post</strong></a> in collaboration with
+        <a href="https://www.isro.gov.in/" target="_blank"><strong>ISRO</strong></a>. This isn&#39;t just
+        another location app; it&#39;s a groundbreaking
+        initiative to modernize
+        India&#39;s postal and address infrastructure, making every location in the country easy to find and
+        share with a
+        unique, 10-character code.
+      </p>
+      <p>Our website is your direct and easy-to-use platform to access this incredible technology. We help you
+        get your
+        personal DIGIPIN and decode any pin you receive, bridging the gap between physical locations and the
+        digital world.
+      </p>
+      <h3 id="what-is-digipin-">What is DIGIPIN?</h3>
+      <p>A <strong>DIGIPIN</strong> (Digital Postal Index Number) is a unique, 10-character alphanumeric code
+        that represents
+        a precise location in India. Developed by the Department of Posts with the expertise of
 
-					<a href="https://www.isro.gov.in/"
-						target="_blank"><strong>ISRO&#39;s National Remote Sensing Centre</strong></a>
-					and <a href="https://www.iith.ac.in/" target="_blank"><strong>IIT Hyderabad</strong></a>, this
-					system divides
-					the entire country into 4m x 4m grids, assigning a unique code to each one.</p>
-				<p>It’s more than a new address—it&#39;s a new layer of precision that complements the existing 6-digit
-					PIN code system.
-					This means your home, office, or even a remote location can be pinpointed with satellite accuracy,
-					revolutionizing
-					everything from e-commerce deliveries to emergency services.</p>
-				<h3 id="how-our-website-works">How Our Website Works</h3>
-				<p>We provide a simple, two-step process to put the power of DIGIPIN in your hands:</p>
-				<ol>
-					<li>
-						<p><strong>Get Your DIGIPIN:</strong> Our platform is designed for simplicity. When you visit,
-							we&#39;ll ask for
-							your permission to use your device&#39;s <strong>GPS</strong>. This is the fastest and most
-							accurate way to
-							get your DIGIPIN, as it allows us to pinpoint your exact 4m x 4m grid.</p>
-					</li>
-					<li>
-						<p><strong>No GPS? No Problem!</strong> We understand that sometimes GPS might be unavailable or
-							you may not
-							want to grant permission. In that case, our system seamlessly uses a
-							<strong>third-party API</strong> to get
-							your location from your IP address. While this provides a less precise location than GPS,
-							it&#39;s still
-							good enough to get you a functional DIGIPIN to get started.</p>
-					</li>
-					<li>
-						<p><strong>Decode a DIGIPIN:</strong> Received a DIGIPIN from a friend or a company? Just enter
-							the 10-character
-							code on our site. We&#39;ll instantly translate it into a map location, complete with
-							coordinates, so you
-							can see exactly where you need to go.</p>
-					</li>
-				</ol>
-
-
-
-				<h3 id="frequently-asked-questions-faq-">Frequently Asked Questions (FAQ)</h3>
-				<ol>
-					<li>
-						<p><strong>How accurate is a DIGIPIN?</strong> The DIGIPIN system is incredibly accurate. It
-							uses a geo-spatial
-							grid developed by ISRO, which divides the entire country into 4m x 4m squares. Each of these
-							tiny squares is
-							assigned a unique DIGIPIN, ensuring that a location can be pinpointed with satellite
-							precision.</p>
-					</li>
-					<li>
-						<p><strong>Do I need to provide my GPS location to get my DIGIPIN?</strong>
-							For the most accurate result, we recommend allowing GPS access. This allows our website to
-							use your
-							device&#39;s exact coordinates to generate the most precise DIGIPIN. However, if you choose
-							not to share
-							your GPS location, our system will automatically use a less precise method by getting a
-							general location
-							from your IP address.</p>
-					</li>
-					<li>
-						<p><strong>Is my location data safe and private?</strong>
-							Yes, absolutely. We take your privacy very seriously. The location data (GPS coordinates or
-							IP address) is
-							used only to generate your DIGIPIN on-the-fly. We do not store, track, or share your
-							personal location data
-							with any third parties.</p>
-					</li>
-					<li>
-						<p><strong>How is DIGIPIN different from a regular PIN code?</strong>
-							A regular 6-digit PIN code identifies a postal office area, which can cover a large
-							geographical region with
-							thousands of addresses. A <strong>DIGIPIN</strong>, on the other hand, identifies a specific
-							4m x 4m square,
-							making it much more accurate for pinpointing a delivery location or a specific meeting point
-							within that
-							area. It&#39;s designed to complement the existing PIN code system, not replace it.</p>
-					</li>
-					<li>
-						<p><strong>Can I get a DIGIPIN for any location in India?</strong>
-							Yes! Because the system is based on an ISRO geo-spatial grid covering the entire country,
-							you can generate a
-							DIGIPIN for any location, whether it&#39;s a home in a major city, a remote village, or even
-							an unaddressed
-							public space like a park or a specific point on a highway.</p>
-					</li>
-					<li>
-						<p><strong>Can I use this DIGIPIN for official purposes, like for a delivery from India Post?</strong>
-							Yes. The DIGIPIN is an official initiative. While its full integration into all services is
-							a work in
-							progress, it is designed to be a standardized, shareable address that can be used by
-							delivery services,
-							e-commerce companies, and even for directing emergency services. The technology is being
-							made available to
-							everyone for widespread adoption.</p>
-					</li>
-					<li>
-						<p><strong>Is this website officially run by India Post or ISRO?</strong>
-							This website serves as a convenient tool to help you access and utilize the official DIGIPIN
-							technology
-							developed by India Post and ISRO. It is an independent platform built to make this amazing
-							service easily
-							accessible to you. You can find more official information and resources on the <a
-								href="https://dac.indiapost.gov.in/mydigipin/home">India Post and DAC portals</a>.</p>
-					</li>
-					<li>
-						<p><strong>My IP address is giving a different location. Why?</strong>
-							IP address-based location can sometimes be less accurate, as it&#39;s an estimation based on
-							where your
-							internet service provider&#39;s network is registered. It may show a location miles away
-							from your actual
-							physical spot. This is why we highly recommend using GPS for the best results, as it
-							provides a true,
-							precise location.</p>
-					</li>
-				</ol>
+        <a href="https://www.isro.gov.in/" target="_blank"><strong>ISRO&#39;s National Remote Sensing
+            Centre</strong></a>
+        and <a href="https://www.iith.ac.in/" target="_blank"><strong>IIT Hyderabad</strong></a>, this
+        system divides
+        the entire country into 4m x 4m grids, assigning a unique code to each one.
+      </p>
+      <p>It’s more than a new address—it&#39;s a new layer of precision that complements the existing 6-digit
+        PIN code system.
+        This means your home, office, or even a remote location can be pinpointed with satellite accuracy,
+        revolutionizing
+        everything from e-commerce deliveries to emergency services.</p>
+      <h3 id="how-our-website-works">How Our Website Works</h3>
+      <p>We provide a simple, two-step process to put the power of DIGIPIN in your hands:</p>
+      <ol>
+        <li>
+          <p><strong>Get Your DIGIPIN:</strong> Our platform is designed for simplicity. When you visit,
+            we&#39;ll ask for
+            your permission to use your device&#39;s <strong>GPS</strong>. This is the fastest and most
+            accurate way to
+            get your DIGIPIN, as it allows us to pinpoint your exact 4m x 4m grid.</p>
+        </li>
+        <li>
+          <p><strong>No GPS? No Problem!</strong> We understand that sometimes GPS might be unavailable or
+            you may not
+            want to grant permission. In that case, our system seamlessly uses a
+            <strong>third-party API</strong> to get
+            your location from your IP address. While this provides a less precise location than GPS,
+            it&#39;s still
+            good enough to get you a functional DIGIPIN to get started.
+          </p>
+        </li>
+        <li>
+          <p><strong>Decode a DIGIPIN:</strong> Received a DIGIPIN from a friend or a company? Just enter
+            the 10-character
+            code on our site. We&#39;ll instantly translate it into a map location, complete with
+            coordinates, so you
+            can see exactly where you need to go.</p>
+        </li>
+      </ol>
 
 
 
-				<h3 id="ready-to-get-your-digipin-">Ready to Get Your DIGIPIN?</h3>
-				<p>It&#39;s time to ditch the old and embrace the new. Click the button below to get your unique DIGIPIN
-					and experience
-					a smarter, more accurate way to share your location.</p>
+      <h3 id="frequently-asked-questions-faq-">Frequently Asked Questions (FAQ)</h3>
+      <ol>
+        <li>
+          <p><strong>How accurate is a DIGIPIN?</strong> The DIGIPIN system is incredibly accurate. It
+            uses a geo-spatial
+            grid developed by ISRO, which divides the entire country into 4m x 4m squares. Each of these
+            tiny squares is
+            assigned a unique DIGIPIN, ensuring that a location can be pinpointed with satellite
+            precision.</p>
+        </li>
+        <li>
+          <p><strong>Do I need to provide my GPS location to get my DIGIPIN?</strong>
+            For the most accurate result, we recommend allowing GPS access. This allows our website to
+            use your
+            device&#39;s exact coordinates to generate the most precise DIGIPIN. However, if you choose
+            not to share
+            your GPS location, our system will automatically use a less precise method by getting a
+            general location
+            from your IP address.</p>
+        </li>
+        <li>
+          <p><strong>Is my location data safe and private?</strong>
+            Yes, absolutely. We take your privacy very seriously. The location data (GPS coordinates or
+            IP address) is
+            used only to generate your DIGIPIN on-the-fly. We do not store, track, or share your
+            personal location data
+            with any third parties.</p>
+        </li>
+        <li>
+          <p><strong>How is DIGIPIN different from a regular PIN code?</strong>
+            A regular 6-digit PIN code identifies a postal office area, which can cover a large
+            geographical region with
+            thousands of addresses. A <strong>DIGIPIN</strong>, on the other hand, identifies a specific
+            4m x 4m square,
+            making it much more accurate for pinpointing a delivery location or a specific meeting point
+            within that
+            area. It&#39;s designed to complement the existing PIN code system, not replace it.</p>
+        </li>
+        <li>
+          <p><strong>Can I get a DIGIPIN for any location in India?</strong>
+            Yes! Because the system is based on an ISRO geo-spatial grid covering the entire country,
+            you can generate a
+            DIGIPIN for any location, whether it&#39;s a home in a major city, a remote village, or even
+            an unaddressed
+            public space like a park or a specific point on a highway.</p>
+        </li>
+        <li>
+          <p><strong>Can I use this DIGIPIN for official purposes, like for a delivery from India Post?</strong>
+            Yes. The DIGIPIN is an official initiative. While its full integration into all services is
+            a work in
+            progress, it is designed to be a standardized, shareable address that can be used by
+            delivery services,
+            e-commerce companies, and even for directing emergency services. The technology is being
+            made available to
+            everyone for widespread adoption.</p>
+        </li>
+        <li>
+          <p><strong>Is this website officially run by India Post or ISRO?</strong>
+            This website serves as a convenient tool to help you access and utilize the official DIGIPIN
+            technology
+            developed by India Post and ISRO. It is an independent platform built to make this amazing
+            service easily
+            accessible to you. You can find more official information and resources on the <a
+              href="https://dac.indiapost.gov.in/mydigipin/home">India Post and DAC portals</a>.</p>
+        </li>
+        <li>
+          <p><strong>My IP address is giving a different location. Why?</strong>
+            IP address-based location can sometimes be less accurate, as it&#39;s an estimation based on
+            where your
+            internet service provider&#39;s network is registered. It may show a location miles away
+            from your actual
+            physical spot. This is why we highly recommend using GPS for the best results, as it
+            provides a true,
+            precise location.</p>
+        </li>
+      </ol>
 
-			</div>
-		</div>
 
-		<div class="center">
-			<div class="links">
-				<a href="http://age-calculator.idkey.in/">Age and Date Calculator</a>
-				<a href="https://dialogue.idkey.in/">Movie Dialogues</a>
-				<a href="http://record.idkey.in/">Screen Recorder</a>
-				<a href="https://digipin.idkey.in/">DIGIPIN</a>
-				<a href="https://pass.idkey.in/">Secured Password Generator</a>
-				<a href="https://ip.idkey.in/">What's My IP Address?</a>
-				<a href="http://palette.idkey.in/">Color Palette Generator from Image</a>
-			</div>
-		</div>
+
+      <h3 id="ready-to-get-your-digipin-">Ready to Get Your DIGIPIN?</h3>
+      <p>It&#39;s time to ditch the old and embrace the new. Click the button below to get your unique DIGIPIN
+        and experience
+        a smarter, more accurate way to share your location.</p>
+
+    </div>
+  </div>
+
+  <div class="center">
+    <div class="links">
+      <a href="http://age-calculator.idkey.in/">Age and Date Calculator</a>
+      <a href="https://dialogue.idkey.in/">Movie Dialogues</a>
+      <a href="http://record.idkey.in/">Screen Recorder</a>
+      <a href="https://digipin.idkey.in/">DIGIPIN</a>
+      <a href="https://pass.idkey.in/">Secured Password Generator</a>
+      <a href="https://ip.idkey.in/">What's My IP Address?</a>
+      <a href="http://palette.idkey.in/">Color Palette Generator from Image</a>
+    </div>
+  </div>
 </body>
 <script src="/script.js"></script>
 

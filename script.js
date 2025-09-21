@@ -9,9 +9,9 @@ const accuracySpan = document.getElementById('accuracy');
 let t = null;
 let map, marker = null;
 let currentlatlng = {
-  lat: 13.038485,
-  lng: 80.122344,
-  accuracy: 35
+  lat: null,
+  lng: null,
+  accuracy: null
 }
 const GOOGLE_MAP_LINK = `https://www.google.com/maps?q=`;
 const IP_LOC_API_URL = `https://ipinfo.io/json`;
@@ -24,23 +24,19 @@ function showToast(m, d = 5) {
   }).showToast();
 }
 
-digipin.addEventListener("click", ( e ) => {
-  navigator.clipboard.writeText( e.target.textContent );
-  showToast(`DIGIPIN copied to your clipboard.`)
-});
-searchDigipin.addEventListener("input", e => {
-  e.preventDefault();
-  let decodedDigipin = Get_LatLng_By_Digipin(e.target.value.trim().toUpperCase());
-  if ( decodedDigipin != "Invalid DIGIPIN" ) {
-    decodedDigipin = decodedDigipin.split(",").map( a => parseFloat( a) );
-    render({lat: decodedDigipin[0], lng: decodedDigipin[1], accuracy: 0});
-  }
-});
-resetMap.addEventListener("click", ( e ) => {
-  render( currentlatlng );
-});
+function debounce(callback, delay = 1000) {
+  let timeoutId; // Variable to store the timeout ID
+  return function(...args) {
+    clearTimeout(timeoutId);
+
+    timeoutId = setTimeout(() => {
+      callback.apply(this, args); // Execute the original function
+    }, delay);
+  };
+}
 
 function render( latlng ) {
+  console.log("Render", latlng);
   digipin.textContent = Get_DIGIPIN(latlng.lat, latlng.lng);
 
   // Update the HTML with the coordinates
@@ -51,7 +47,7 @@ function render( latlng ) {
   accuracySpan.textContent = latlng.accuracy.toFixed(2);
 
   if ( !map ) {
-    map = L.map('map').setView([currentlatlng.lat, currentlatlng.lng], 15);
+    map = L.map('map').setView([latlng.lat, latlng.lng], 15);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -62,12 +58,54 @@ function render( latlng ) {
   }
 
   if ( !marker ) {
-    marker = L.marker([currentlatlng.lat, currentlatlng.lng]).addTo(map);
+    marker = L.marker([latlng.lat, latlng.lng]).addTo(map);
   } else {
     marker.setLatLng({ lat: latlng.lat, lng: latlng.lng });
   }
   marker.bindPopup(`<strong>Digipin:</strong> ${digipin.textContent}<br/><a href="${GOOGLE_MAP_LINK}${latlng.lat},${latlng.lng}" target="_blank">View on Google Maps</a>`).openPopup();
 }
+
+function handleHash( hash ) {
+  let decodedDigipin = Get_LatLng_By_Digipin( hash.replaceAll("#", "").toUpperCase() );
+  if ( decodedDigipin != "Invalid DIGIPIN" ) {
+    decodedDigipin = decodedDigipin.split(",").map( a => parseFloat( a) );
+    console.log("Handling Hash", hash, decodedDigipin);
+    render({lat: decodedDigipin[0], lng: decodedDigipin[1], accuracy: 0});
+  }
+}
+
+function resetMapMarker() {
+  locationDetails.style.display = 'none';
+  cardLoader.style.display = 'block';
+  console.log( "Resetting map" );
+  if ( Math.min( currentlatlng.lat, currentlatlng.lng ) == 0 || isNaN(Math.min( currentlatlng.lat, currentlatlng.lng ) ) ) {
+    console.log( "Reloading map" );
+    navigator.permissions.query({name: 'geolocation'}).then( r => {
+      handleLocationPermission( r.state );
+      r.onchange = ( e ) => {
+        e.preventDefault();
+        handleLocationPermission( e.target.state );
+      }
+    });
+  } else {
+    console.log( "Not reloading map", currentlatlng );
+    render( currentlatlng );
+  }
+}
+
+digipin.addEventListener("click", ( e ) => {
+  navigator.clipboard.writeText( e.target.textContent );
+  showToast(`DIGIPIN copied to your clipboard.`)
+});
+searchDigipin.addEventListener("input", debounce(e => {
+  e.preventDefault();
+  location.hash = e.target.value.trim().toUpperCase();
+  handleHash( location.hash );
+}));
+resetMap.addEventListener("click", ( e ) => {
+  e.preventDefault();
+  resetMapMarker();
+});
 
 async function getGeoLocation() {
   return new Promise( ( resolve, reject ) => {
@@ -82,22 +120,6 @@ async function getGeoLocation() {
         resolve(currentlatlng);
       },
       (error) => {
-        // Error callback
-        let errorMessage;
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = "User denied the request for Geolocation.";
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = "Location information is unavailable.";
-            break;
-          case error.TIMEOUT:
-            errorMessage = "The request to get user location timed out.";
-            break;
-          case error.UNKNOWN_ERROR:
-            errorMessage = "An unknown error occurred.";
-            break;
-        }
         reject( error );
       }
     );
@@ -118,20 +140,21 @@ async function getLocationByIP() {
   });
 }
 
-navigator.permissions.query({name: 'geolocation'}).then( r => {
-  handleLocationPermission( r.state );
-  r.onchange = ( e ) => {
-    e.preventDefault();
-    handleLocationPermission( e.target.state );
-  }
-});
-
 function handleLocationPermission( state ) {
   if ( state == "denied" ) {
     showToast( "GPS Permission denied by the user hence fetching location using IP." );
     return getLocationByIP().then( render );
   }
-  getGeoLocation().then( render );
+  getGeoLocation().then( res => {render( res );});
+}
+
+console.log( 'Location HASH', location.hash, location.hash.length );
+
+if ( location.hash.length != 0 ) {
+  console.log( "Decoding hash" );
+  handleHash( location.hash );
+} else {
+  resetMapMarker();
 }
 
 /**
