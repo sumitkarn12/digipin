@@ -3,6 +3,7 @@ const searchDigipin = document.getElementById('search-digipin');
 const resetMap = document.getElementById('reset-map');
 const cardLoader = document.querySelector('.card-loader');
 const digipin = document.getElementById('digipin');
+const shareBtn = document.getElementById('share');
 const latitudeSpan = document.getElementById('latitude');
 const longitudeSpan = document.getElementById('longitude');
 const accuracySpan = document.getElementById('accuracy');
@@ -15,6 +16,7 @@ let currentlatlng = {
 }
 const GOOGLE_MAP_LINK = `https://www.google.com/maps?q=`;
 const IP_LOC_API_URL = `https://ipinfo.io/json`;
+const PAGE_TITLE = document.title;
 
 function showToast(m, d = 5) {
   t = Toastify({
@@ -38,6 +40,8 @@ function debounce(callback, delay = 1000) {
 function render( latlng ) {
   console.log("Render", latlng);
   digipin.textContent = Get_DIGIPIN(latlng.lat, latlng.lng);
+  location.hash = digipin.textContent;
+  document.title =  `${PAGE_TITLE} || ${digipin.textContent}`;
 
   // Update the HTML with the coordinates
   locationDetails.style.display = 'grid';
@@ -65,21 +69,11 @@ function render( latlng ) {
   marker.bindPopup(`<strong>Digipin:</strong> ${digipin.textContent}<br/><a href="${GOOGLE_MAP_LINK}${latlng.lat},${latlng.lng}" target="_blank">View on Google Maps</a>`).openPopup();
 }
 
-function handleHash( hash ) {
-  let decodedDigipin = Get_LatLng_By_Digipin( hash.replaceAll("#", "").toUpperCase() );
-  if ( decodedDigipin != "Invalid DIGIPIN" ) {
-    decodedDigipin = decodedDigipin.split(",").map( a => parseFloat( a) );
-    console.log("Handling Hash", hash, decodedDigipin);
-    render({lat: decodedDigipin[0], lng: decodedDigipin[1], accuracy: 0});
-  }
-}
-
 function resetMapMarker() {
   locationDetails.style.display = 'none';
   cardLoader.style.display = 'block';
-  console.log( "Resetting map" );
   if ( Math.min( currentlatlng.lat, currentlatlng.lng ) == 0 || isNaN(Math.min( currentlatlng.lat, currentlatlng.lng ) ) ) {
-    console.log( "Reloading map" );
+    console.log( "Fetching coordinates" );
     navigator.permissions.query({name: 'geolocation'}).then( r => {
       handleLocationPermission( r.state );
       r.onchange = ( e ) => {
@@ -88,7 +82,7 @@ function resetMapMarker() {
       }
     });
   } else {
-    console.log( "Not reloading map", currentlatlng );
+    console.log( "Rendering map from cache", currentlatlng );
     render( currentlatlng );
   }
 }
@@ -99,12 +93,28 @@ digipin.addEventListener("click", ( e ) => {
 });
 searchDigipin.addEventListener("input", debounce(e => {
   e.preventDefault();
-  location.hash = e.target.value.trim().toUpperCase();
-  handleHash( location.hash );
+  handleHash( e.target.value.toUpperCase().trim() );
 }));
 resetMap.addEventListener("click", ( e ) => {
   e.preventDefault();
   resetMapMarker();
+});
+shareBtn.addEventListener( "click", e => {
+  e.preventDefault();
+  navigator.share( digipin.textContent );
+  let shareData = {
+    text: digipin.textContent,
+    title: document.title,
+    url: location.href
+  };
+
+  if (!navigator.canShare) {
+    showToast("navigator.canShare() not supported.");
+  } else if (navigator.canShare(shareData)) {
+    navigator.share( shareData );
+  } else {
+    showToast("Specified data cannot be shared.");
+  }
 });
 
 async function getGeoLocation() {
@@ -148,12 +158,21 @@ function handleLocationPermission( state ) {
   getGeoLocation().then( res => {render( res );});
 }
 
-console.log( 'Location HASH', location.hash, location.hash.length );
+function handleHash( hash ) {
+  console.log( hash );
+  let decodedDigipin = Get_LatLng_By_Digipin( hash.replaceAll("#", "").toUpperCase() );
+  if ( decodedDigipin != "Invalid DIGIPIN" ) {
+    decodedDigipin = decodedDigipin.split(",").map( a => parseFloat( a) );
+    console.log("Handling Hash", hash, decodedDigipin);
+    render({lat: decodedDigipin[0], lng: decodedDigipin[1], accuracy: 0});
+  }
+}
 
 if ( location.hash.length != 0 ) {
   console.log( "Decoding hash" );
   handleHash( location.hash );
 } else {
+  console.log( "CURRENT LOCATION" );
   resetMapMarker();
 }
 
