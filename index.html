@@ -14,6 +14,8 @@
   <meta property="og:url" content="https://digipin.idkey.in/">
   <meta property="og:type" content="website">
 
+  <meta name="theme-color" content="#E9B3FB" />
+
 
   <meta property="og:image"
     content="https://og.tailgraph.com/og?title=Get%20your%20DIGIPIN&text=A%20new%20digital%20address%20system%20by%20India%20Post.%20Get%20your%20unique%20code%20for%20precise%20location%20identification%20%26%20seamless%20delivery.&bgUrl=https%3A%2F%2Fi.postimg.cc%2Fyd3Zg49b%2Fdigipin.jpg&titleFontFamily=Inter&bgTailwind=bg-no-repeat%20bg-cover&titleTailwind=text-6xl%20text-white%20font-black%20text-left%20px-16&textFontFamily=Josephine%20Sans&textTailwind=text-5xl%20text-white%20text-left%20px-16&overlay=1&containerTailwind=p-16" />
@@ -38,20 +40,17 @@
   <div class="container">
     <div class="box">
       <div class="header">
-        <h1>DIGIPIN</h1>
+        <h1><span class="text-secondary">digi</span>pin</h1>
         <input type="search" id="search-digipin" placeholder="Search digipin" />
       </div>
 
       <div class="location-details" id="location-details">
-        <div id="latitude">34.5444</div>
-        <div id="longitude">23.678</div>
-        <div id="accuracy">35.00</div>
-        <div id="digipin">XXX-XXX-XXXX</div>
-        <button id="reset-map" class="button">My Current Location</button>
         <div id="map-wrapper">
           <button id="share" class="button">Share</button>
           <div id="map"></div>
+          <button id="reset-map" class="button">My Current Location</button>
         </div>
+        <div id="digipin">XXX-XXX-XXXX</div>
       </div>
       <div class="card-loader"></div>
     </div>

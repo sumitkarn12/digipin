@@ -1,3 +1,4 @@
+.text-secondary { color: var(--secondary-color); font-weight: 100; }
 .button { padding: 0.8rem 1.5rem; font-size: 1rem; background-color: var(--primary-color); color: var(--light-color); border: none; border-radius: 5px; cursor: pointer; user-select: none; transition: all 0.3s; box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px; }
 .button:hover { background-color: var(--secondary-color); }
 
@@ -11,9 +12,9 @@
 .location-details>#longitude::before { content: "Longitude"; }
 .location-details>#accuracy::before { content: "Accuracy"; }
 .location-details>#accuracy::after { content: " mtrs"; }
-.location-details>#reset-map.button { grid-column: 2 / span 2; }
+.location-details #reset-map { position: absolute; bottom: 16px; left: 50%;  transform: translateX(-50%); z-index: 999; }
 .location-details>#digipin::before { content: "My DIGIPIN: "; color: var(--secondary-color); font-size: 12px; display: block; text-align: left; }
-.location-details>#digipin { cursor: pointer; font-weight: bold; grid-column: 2 / span 2; grid-row: 1 / span 2; font-size: 22px; padding: 1rem; }
+.location-details>#digipin { cursor: pointer; font-weight: bold; grid-column: 1 / span 3; font-size: 22px; padding: 1rem; }
 .location-details #map-wrapper { height: 50vh; border-radius: 5px; overflow: hidden; grid-column: 1 / span 3; padding: 0; position: relative; }
 .location-details #map-wrapper #share { position: absolute; right: 16px; top: 16px; z-index: 999; }
 .location-details #map { height: 50vh; }

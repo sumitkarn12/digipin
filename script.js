@@ -4,9 +4,6 @@ const resetMap = document.getElementById('reset-map');
 const cardLoader = document.querySelector('.card-loader');
 const digipin = document.getElementById('digipin');
 const shareBtn = document.getElementById('share');
-const latitudeSpan = document.getElementById('latitude');
-const longitudeSpan = document.getElementById('longitude');
-const accuracySpan = document.getElementById('accuracy');
 let t = null;
 let map, marker = null;
 let currentlatlng = {
@@ -46,9 +43,6 @@ function render( latlng ) {
   // Update the HTML with the coordinates
   locationDetails.style.display = 'grid';
   cardLoader.style.display = 'none';
-  latitudeSpan.textContent = latlng.lat.toFixed(6);
-  longitudeSpan.textContent = latlng.lng.toFixed(6);
-  accuracySpan.textContent = latlng.accuracy.toFixed(2);
 
   if ( !map ) {
     map = L.map('map').setView([latlng.lat, latlng.lng], 15);
@@ -66,7 +60,22 @@ function render( latlng ) {
   } else {
     marker.setLatLng({ lat: latlng.lat, lng: latlng.lng });
   }
-  marker.bindPopup(`<strong>Digipin:</strong> ${digipin.textContent}<br/><a href="${GOOGLE_MAP_LINK}${latlng.lat},${latlng.lng}" target="_blank">View on Google Maps</a>`).openPopup();
+  if ( latlng.accuracy ) {
+    marker.bindPopup(`
+      <strong>Digipin:</strong> ${digipin.textContent}<br/>
+      <strong>Latitude:</strong> ${latlng.lat.toFixed(6)}<br/>
+      <strong>Longitude:</strong> ${latlng.lng.toFixed(6) }<br/>
+      <strong>Accuracy:</strong> ${latlng.accuracy.toFixed(2) }<br/>
+      <a href="${GOOGLE_MAP_LINK}${latlng.lat},${latlng.lng}" target="_blank">See on Google Maps</a>
+      `).openPopup();
+    } else {
+    marker.bindPopup(`
+      <strong>Digipin:</strong> ${digipin.textContent}<br/>
+      <strong>Latitude:</strong> ${latlng.lat.toFixed(6)}<br/>
+      <strong>Longitude:</strong> ${latlng.lng.toFixed(6) }<br/>
+      <a href="${GOOGLE_MAP_LINK}${latlng.lat},${latlng.lng}" target="_blank">See on Google Maps</a>
+      `).openPopup();
+  }
 }
 
 function resetMapMarker() {
