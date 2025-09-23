@@ -11,10 +11,11 @@
 .location-details { display: none; gap: 6px; position: relative; }
 .location-details>div { padding: 4px 6px; color: var(--primary-color); font-size: 14px; }
 .location-details>#digipin::before { content: "My DIGIPIN: "; color: var(--secondary-color); font-size: 12px; display: block; text-align: left; }
-.location-details>#digipin { cursor: pointer; font-weight: bold; font-size: 22px; padding: 1rem; }
-.location-details #map-wrapper { height: 85vh; overflow: hidden; padding: 0; position: relative; }
+.location-details>#digipin { cursor: pointer; font-weight: bold; font-size: clamp(22px, 12vw, 3rem); padding: 1rem; }
+.location-details #map-wrapper { height: 85dvh; overflow: hidden; padding: 0; position: relative; }
 .location-details #map { height: 100%; }
 .location-details .map-control { position: absolute; bottom: 0; left: 0; width: 100%; padding: 16px; z-index: 999; }
+.location-details .map-control > * { display: block; margin-bottom: 8px; }
 
 .card-loader { width: 100%; padding: 1rem; text-align: center; border-radius: .8rem; background-color: white; }
 .card-loader::before, .card-loader::after { content: ""; display: block; background-image: linear-gradient(90deg, #ccc 0px, rgb(229 229 229 / 90%) 40px, #ccc 80px ); background-size: 300%; background-position: 100% 0; border-radius: inherit; animation: shimmer 1.5s infinite; }

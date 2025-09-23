@@ -5,7 +5,7 @@ const cardLoader = document.querySelector('.card-loader');
 const digipin = document.getElementById('digipin');
 const shareBtn = document.getElementById('share');
 let t = null;
-let map, marker = null;
+let map, marker, selectedcoords = null;
 let currentlatlng = {
   lat: null,
   lng: null,
@@ -35,6 +35,7 @@ function debounce(callback, delay = 1000) {
 }
 
 function render( latlng ) {
+  selectedcoords = latlng;
   console.log("Render", latlng);
   digipin.textContent = Get_DIGIPIN(latlng.lat, latlng.lng);
   location.hash = digipin.textContent;
@@ -45,7 +46,7 @@ function render( latlng ) {
   cardLoader.style.display = 'none';
 
   if ( !map ) {
-    map = L.map('map').setView([latlng.lat, latlng.lng], 15);
+    map = L.map('map')
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -56,27 +57,23 @@ function render( latlng ) {
     })
   }
 
+  map.setView([latlng.lat, latlng.lng], 15);
+  
   if ( !marker ) {
     marker = L.marker([latlng.lat, latlng.lng]).addTo(map);
   } else {
-    marker.setLatLng({ lat: latlng.lat, lng: latlng.lng });
+    marker.setLatLng(latlng);
   }
-  if ( latlng.accuracy ) {
-    marker.bindPopup(`
-      <strong>Digipin:</strong> ${digipin.textContent}<br/>
-      <strong>Latitude:</strong> ${latlng.lat.toFixed(6)}<br/>
-      <strong>Longitude:</strong> ${latlng.lng.toFixed(6) }<br/>
-      <strong>Accuracy:</strong> ${latlng.accuracy.toFixed(2) }<br/>
-      <a href="${GOOGLE_MAP_LINK}${latlng.lat},${latlng.lng}" target="_blank">See on Google Maps</a>
-      `).openPopup();
-    } else {
-    marker.bindPopup(`
-      <strong>Digipin:</strong> ${digipin.textContent}<br/>
-      <strong>Latitude:</strong> ${latlng.lat.toFixed(6)}<br/>
-      <strong>Longitude:</strong> ${latlng.lng.toFixed(6) }<br/>
-      <a href="${GOOGLE_MAP_LINK}${latlng.lat},${latlng.lng}" target="_blank">See on Google Maps</a>
-      `).openPopup();
-  }
+  
+  let popupHTML = `<strong>Digipin:</strong> ${digipin.textContent}<br/>`;
+  popupHTML += `<strong>Latitude:</strong> ${latlng.lat.toFixed(6)}<br/>`;
+  popupHTML += `<strong>Longitude:</strong> ${latlng.lng.toFixed(6) }<br/>`;
+
+  popupHTML += ( latlng.accuracy )?`<strong>Accuracy:</strong> ${latlng.accuracy.toFixed(2) }<br/>`:''; 
+  popupHTML += `<a href="${GOOGLE_MAP_LINK}${latlng.lat},${latlng.lng}" target="_blank">See on Google Maps</a>`;
+  marker.bindPopup( popupHTML ).openPopup();
+
+  map.flyTo( latlng );
 }
 
 function resetMapMarker() {
@@ -113,8 +110,8 @@ shareBtn.addEventListener( "click", e => {
   e.preventDefault();
   navigator.share( digipin.textContent );
   let shareData = {
-    text: digipin.textContent,
-    title: document.title,
+    title: digipin.textContent,
+    text: `Here is my _DIGIPIN_ details.\n\nDIGIPIN: *${digipin.textContent}*\nLatitude: ${selectedcoords.lat.toFixed(6)}\nLongitude: ${selectedcoords.lng.toFixed(6)}\n\nYou can find yours as well.\n\n`,
     url: location.href
   };
 
