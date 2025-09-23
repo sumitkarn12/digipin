@@ -41,7 +41,7 @@ function render( latlng ) {
   document.title =  `${PAGE_TITLE} || ${digipin.textContent}`;
 
   // Update the HTML with the coordinates
-  locationDetails.style.display = 'grid';
+  locationDetails.style.display = 'block';
   cardLoader.style.display = 'none';
 
   if ( !map ) {
@@ -50,6 +50,7 @@ function render( latlng ) {
       maxZoom: 19,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
+    map.zoomControl.setPosition( "bottomright" );
     map.on("click", ev => {
       render({ lat: ev.latlng.lat, lng: ev.latlng.lng, accuracy: 0 });
     })
