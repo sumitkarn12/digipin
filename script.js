@@ -160,9 +160,16 @@ async function getLocationByIP() {
 function handleLocationPermission( state ) {
   if ( state == "denied" ) {
     showToast( "GPS Permission denied by the user hence fetching location using IP." );
-    return getLocationByIP().then( render );
+    return getLocationByIP().then( render ).catch( err => {
+      showToast( JSON.stringify( err ) );
+    });
   }
-  getGeoLocation().then( res => {render( res );});
+  getGeoLocation().then( res => {
+    render( res );
+  }).catch( err => {
+    showToast( JSON.stringify(err) + "<br/> You should reload the page." );
+    getLocationByIP().then( render );
+  });
 }
 
 function handleHash( hash ) {
