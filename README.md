@@ -23,3 +23,5 @@ The core functionality of the [DIGIPIN](https://digipin.idkey.in) web app is bui
 3.  **[DIGIPIN](https://digipin.idkey.in) Search & Decoding:** The search bar allows you to enter a [DIGIPIN](https://digipin.idkey.in) to see its corresponding location. Upon a successful search, the map will be centered on the coordinates associated with that [DIGIPIN](https://digipin.idkey.in).
 4.  **Shareable URLs:** When a [DIGIPIN](https://digipin.idkey.in) is successfully decoded via the search function, the app automatically appends the [DIGIPIN](https://digipin.idkey.in) to the URL as a hash (e.g., `https://digipin.idkey.in/#digipin`). This makes it easy to share a specific location with others.
 5.  **Location Reset:** The initial location (either from GPS or IP) is stored in a global object. This allows you to easily reset the map to your initial detected location at any point. If this global object is empty (e.g., after a page refresh), the app will re-fetch the location based on your permission settings.
+
+# Testing changes in the beta
