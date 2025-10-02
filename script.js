@@ -3,6 +3,7 @@ const searchDigipin = document.getElementById('search-digipin');
 const resetMap = document.getElementById('reset-map');
 const cardLoader = document.querySelector('.card-loader');
 const digipin = document.getElementById('digipin');
+const copyBtn = document.getElementById('copy');
 const shareBtn = document.getElementById('share');
 let t = null;
 let map, marker, selectedcoords = null;
@@ -12,8 +13,10 @@ let currentlatlng = {
   accuracy: null
 }
 const GOOGLE_MAP_LINK = `https://www.google.com/maps?q=`;
+const GOOGLE_PLUS_CODE_LINK = `https://www.google.com/maps/place/`;
 const IP_LOC_API_URL = `https://ipinfo.io/json`;
 const PAGE_TITLE = document.title;
+// const CITY_API_URL = "https://api-bdc.io/data/reverse-geocode-client?localityLanguage=en&latitude={lat}&longitude={lng}"
 
 function showToast(m, d = 5) {
   t = Toastify({
@@ -25,7 +28,7 @@ function showToast(m, d = 5) {
 
 function debounce(callback, delay = 1000) {
   let timeoutId; // Variable to store the timeout ID
-  return function(...args) {
+  return function (...args) {
     clearTimeout(timeoutId);
 
     timeoutId = setTimeout(() => {
@@ -34,98 +37,105 @@ function debounce(callback, delay = 1000) {
   };
 }
 
-function render( latlng ) {
+function initiateMap() {
+  map = L.map('map');
+  L.tileLayer('https://www.google.com/maps/vt?lyrs=m@189&gl=cn&x={x}&y={y}&z={z}', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="http://www.google.com/maps">Google Maps</a>'
+  }).addTo(map);
+  // L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  //   maxZoom: 19,
+  //   attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  // }).addTo(map);
+  map.zoomControl.setPosition("bottomright");
+  map.on("click", ev => {
+    let calculatedDigipin = Get_DIGIPIN(ev.latlng.lat, ev.latlng.lng);
+    let coords = Get_LatLng_By_Digipin( calculatedDigipin );
+    render( coords );
+  });
+}
+
+function render(latlng) {
   selectedcoords = latlng;
   console.log("Render", latlng);
-  digipin.textContent = Get_DIGIPIN(latlng.lat, latlng.lng);
-  location.hash = digipin.textContent;
-  document.title =  `${PAGE_TITLE} || ${digipin.textContent}`;
+  selectedcoords.digipin = Get_DIGIPIN(latlng.lat, latlng.lng);
+  selectedcoords.plusCode = OpenLocationCode.encode(latlng.lat, latlng.lng, OpenLocationCode.CODE_PRECISION_EXTRA);
+  // digipin.textContent = digipin;
+  location.hash = selectedcoords.digipin;
+  document.title = `${PAGE_TITLE} || ${selectedcoords.digipin}`;
 
   // Update the HTML with the coordinates
   locationDetails.style.display = 'block';
   cardLoader.style.display = 'none';
 
-  if ( !map ) {
-    map = L.map('map')
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(map);
-    map.zoomControl.setPosition( "bottomright" );
-    map.on("click", ev => {
-      render({ lat: ev.latlng.lat, lng: ev.latlng.lng, accuracy: 0 });
-    })
-  }
-
+  if (!map)
+    initiateMap();
   map.setView([latlng.lat, latlng.lng], 15);
-  
-  if ( !marker ) {
+
+  if (!marker)
     marker = L.marker([latlng.lat, latlng.lng]).addTo(map);
-  } else {
-    marker.setLatLng(latlng);
-  }
-  
-  let popupHTML = `<strong>Digipin:</strong> ${digipin.textContent}<br/>`;
-  popupHTML += `<strong>Latitude:</strong> ${latlng.lat.toFixed(6)}<br/>`;
-  popupHTML += `<strong>Longitude:</strong> ${latlng.lng.toFixed(6) }<br/>`;
+  marker.setLatLng(latlng);
 
-  popupHTML += ( latlng.accuracy )?`<strong>Accuracy:</strong> ${latlng.accuracy.toFixed(2) }<br/>`:''; 
-  popupHTML += `<a href="${GOOGLE_MAP_LINK}${latlng.lat},${latlng.lng}" target="_blank">See on Google Maps</a>`;
-  marker.bindPopup( popupHTML ).openPopup();
+  let popupHTML = `<div>
+    <h1>${selectedcoords.digipin}</h1>
+    <strong>Plus Code:</strong> <a href="${GOOGLE_PLUS_CODE_LINK}${encodeURIComponent(selectedcoords.plusCode)}" target="_blank">${selectedcoords.plusCode}</a>
+    <div><strong>Lat:</strong> ${latlng.lat.toFixed(6)}, <strong>Long:</strong> ${latlng.lng.toFixed(6)}</div>
+    <a href="${GOOGLE_MAP_LINK}${latlng.lat},${latlng.lng}" target="_blank">See on Google Maps</a>
+  </div>`;
+  marker.bindPopup(popupHTML).openPopup();
 
-  map.flyTo( latlng );
+  map.flyTo(latlng);
 }
 
 function resetMapMarker() {
   locationDetails.style.display = 'none';
   cardLoader.style.display = 'block';
-  if ( Math.min( currentlatlng.lat, currentlatlng.lng ) == 0 || isNaN(Math.min( currentlatlng.lat, currentlatlng.lng ) ) ) {
-    console.log( "Fetching coordinates" );
-    navigator.permissions.query({name: 'geolocation'}).then( r => {
-      handleLocationPermission( r.state );
-      r.onchange = ( e ) => {
+  if (Math.min(currentlatlng.lat, currentlatlng.lng) == 0 || isNaN(Math.min(currentlatlng.lat, currentlatlng.lng))) {
+    console.log("Fetching coordinates");
+    navigator.permissions.query({ name: 'geolocation' }).then(r => {
+      handleLocationPermission(r.state);
+      r.onchange = (e) => {
         e.preventDefault();
-        handleLocationPermission( e.target.state );
+        handleLocationPermission(e.target.state);
       }
     });
   } else {
-    console.log( "Rendering map from cache", currentlatlng );
-    render( currentlatlng );
+    console.log("Rendering map from cache", currentlatlng);
+    render(currentlatlng);
   }
 }
 
-digipin.addEventListener("click", ( e ) => {
-  navigator.clipboard.writeText( e.target.textContent );
-  showToast(`DIGIPIN copied to your clipboard.`)
+copyBtn.addEventListener("click", ( e ) => {
+  navigator.clipboard.writeText( selectedcoords.digipin );
+  showToast(`${selectedcoords.digipin} DIGIPIN copied to your clipboard.`)
 });
 searchDigipin.addEventListener("input", debounce(e => {
   e.preventDefault();
-  handleHash( e.target.value.toUpperCase().trim() );
+  handleHash(e.target.value.toUpperCase().trim());
 }));
-resetMap.addEventListener("click", ( e ) => {
+resetMap.addEventListener("click", (e) => {
   e.preventDefault();
   resetMapMarker();
 });
-shareBtn.addEventListener( "click", e => {
+shareBtn.addEventListener("click", e => {
   e.preventDefault();
-  navigator.share( digipin.textContent );
   let shareData = {
-    title: digipin.textContent,
-    text: `Here is my _DIGIPIN_ details.\n\nDIGIPIN: *${digipin.textContent}*\nLatitude: ${selectedcoords.lat.toFixed(6)}\nLongitude: ${selectedcoords.lng.toFixed(6)}\n\nYou can find yours as well.\n\n`,
+    title: currentlatlng.digipin,
+    text: `Here is my _DIGIPIN_ details.\n\nDIGIPIN: *${currentlatlng.digipin}*\nLatitude: ${selectedcoords.lat.toFixed(6)}\nLongitude: ${selectedcoords.lng.toFixed(6)}\n\nYou can find yours as well.\n\n`,
     url: location.href
   };
 
   if (!navigator.canShare) {
     showToast("navigator.canShare() not supported.");
   } else if (navigator.canShare(shareData)) {
-    navigator.share( shareData );
+    navigator.share(shareData);
   } else {
     showToast("Specified data cannot be shared.");
   }
 });
 
 async function getGeoLocation() {
-  return new Promise( ( resolve, reject ) => {
+  return new Promise((resolve, reject) => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         t?.hideToast();
@@ -137,7 +147,7 @@ async function getGeoLocation() {
         resolve(currentlatlng);
       },
       (error) => {
-        reject( error );
+        reject(error);
       }
     );
   });
@@ -145,48 +155,50 @@ async function getGeoLocation() {
 
 async function getLocationByIP() {
   return new Promise((resolve, reject) => {
-    fetch( IP_LOC_API_URL ). then( res => res.json()).
-    then( j => {
-      let loc = j.loc.split(",").map(a => parseFloat(a));
-      currentlatlng.lat = loc[0];
-      currentlatlng.lng = loc[1];
-      currentlatlng.accuracy = 1000;
-      resolve( currentlatlng );
-    })
-    .catch( () => { reject( "Unable to fetch location by IP." ) });
+    fetch(IP_LOC_API_URL).then(res => res.json()).
+      then(j => {
+        let loc = j.loc.split(",").map(a => parseFloat(a));
+        currentlatlng.lat = loc[0];
+        currentlatlng.lng = loc[1];
+        currentlatlng.accuracy = 1000;
+        resolve(currentlatlng);
+      })
+      .catch(() => { reject("Unable to fetch location by IP.") });
   });
 }
 
-function handleLocationPermission( state ) {
-  if ( state == "denied" ) {
-    showToast( "GPS Permission denied by the user hence fetching location using IP." );
-    return getLocationByIP().then( render ).catch( err => {
-      showToast( JSON.stringify( err ) );
+function handleLocationPermission(state) {
+  if (state == "denied") {
+    showToast("GPS Permission denied by the user hence fetching location using IP.");
+    return getLocationByIP().then(render).catch(err => {
+      showToast(JSON.stringify(err));
     });
   }
-  getGeoLocation().then( res => {
-    render( res );
-  }).catch( err => {
-    showToast( JSON.stringify(err) + "<br/> You should reload the page." );
-    getLocationByIP().then( render );
+  getGeoLocation().then(res => {
+    render(res);
+  }).catch(err => {
+    showToast(err.message);
+    getLocationByIP().then(render);
   });
 }
 
-function handleHash( hash ) {
-  console.log( hash );
-  let decodedDigipin = Get_LatLng_By_Digipin( hash.replaceAll("#", "").toUpperCase() );
-  if ( decodedDigipin != "Invalid DIGIPIN" ) {
-    decodedDigipin = decodedDigipin.split(",").map( a => parseFloat( a) );
+function handleHash(hash) {
+  console.log(hash);
+  try {
+    let decodedDigipin = Get_LatLng_By_Digipin(hash.replaceAll("#", "").toUpperCase());
     console.log("Handling Hash", hash, decodedDigipin);
-    render({lat: decodedDigipin[0], lng: decodedDigipin[1], accuracy: 0});
+    render( decodedDigipin );
+  } catch (err) {
+    showToast( err.message );
+    resetMapMarker();
   }
 }
 
-if ( location.hash.length != 0 ) {
-  console.log( "Decoding hash" );
-  handleHash( location.hash );
+if (location.hash.length != 0) {
+  console.log("Decoding hash");
+  handleHash(location.hash);
 } else {
-  console.log( "CURRENT LOCATION" );
+  console.log("CURRENT LOCATION");
   resetMapMarker();
 }
 
@@ -279,9 +291,10 @@ function Get_DIGIPIN(lat, lon) {
   as input and encodes it into degree-decimal coordinates
 */
 function Get_LatLng_By_Digipin(vDigiPin) {
+  let oDigiPin = vDigiPin;
   vDigiPin = vDigiPin.replaceAll('-', '');
   if (vDigiPin.length != 10) {
-    return "Invalid DIGIPIN";
+    throw new Error("Invalid DIGIPIN");    
   }
   //DIGIPIN Labelling Grid
   var L = [
@@ -291,8 +304,7 @@ function Get_LatLng_By_Digipin(vDigiPin) {
     ['L', 'M', 'P', 'T']
   ];
   // Bounding Box Extent
-  var MinLat = 2.50; var MaxLat = 38.50; var MinLng = 63.50; var MaxLng =
-    99.50;
+  var MinLat = 2.50; var MaxLat = 38.50; var MinLng = 63.50; var MaxLng = 99.50;
   var LatDivBy = 4;
   var LngDivBy = 4;
   var LatDivVal = 0;
@@ -308,21 +320,21 @@ function Get_LatLng_By_Digipin(vDigiPin) {
     f = 0;
 
     for (let r = 0; r < LatDivBy; r++) {
-          for (let c = 0; c < LngDivBy; c++) {
-            if (L[r][c] == digipinChar) {
-              ri = r;
-              ci = c;
-              f = 1;
-              break;
-            }
-          }
+      for (let c = 0; c < LngDivBy; c++) {
+        if (L[r][c] == digipinChar) {
+          ri = r;
+          ci = c;
+          f = 1;
+          break;
         }
+      }
+    }
 
-        if (f == 0) {
-          return 'Invalid DIGIPIN';
-        }
-        Lat1 = MaxLat - (LatDivVal * (ri + 1));
-        Lat2 = MaxLat - (LatDivVal * (ri));
+    if (f == 0) {
+      throw new Error("Invalid DIGIPIN");
+    }
+    Lat1 = MaxLat - (LatDivVal * (ri + 1));
+    Lat2 = MaxLat - (LatDivVal * (ri));
     Lng1 = MinLng + (LngDivVal * (ci));
     Lng2 = MinLng + (LngDivVal * (ci + 1));
 
@@ -331,8 +343,14 @@ function Get_LatLng_By_Digipin(vDigiPin) {
     MinLng = Lng1;
     MaxLng = Lng2;
   }
-  cLat = (Lat2 + Lat1) / 2;
-  cLng = (Lng2 + Lng1) / 2;
 
-  return cLat + ', ' + cLng;
+  return {
+    lat: (Lat2 + Lat1) / 2,
+    lng: (Lng2 + Lng1) / 2,
+    minLat: MinLat,
+    maxLat: MaxLat,
+    minLng: MinLng,
+    maxLng: MaxLng,
+    digipin: oDigiPin
+  }
 }
